@@ -1,0 +1,27 @@
+{
+  "name": "replmobi",
+  "author": {
+    "name": "Tomasz Janczuk <tomasz@janczuk.org>",
+    "url": "http://tomasz.janczuk.org",
+    "twitter": "tjanczuk"
+  },
+  "version": "0.1.0-pre",
+  "description": "JavaScript REPL relay",
+  "main": "./server.js",
+  "engines": {
+    "node": ">= 0.10"
+  },
+  "licenses": [
+    {
+      "type": "Apache",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "dependencies": {
+    "ws": "0.4.31",
+    "uuid": "1.4.1"
+  },
+  "bin": {
+    "replmobi": "./server.js"
+  }
+}
