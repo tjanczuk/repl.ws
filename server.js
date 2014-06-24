@@ -7,7 +7,8 @@ var http = require('http')
     , client = fs.readFileSync(path.join(__dirname, 'client.js'), 'utf8')
     , index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-var clientUrlRegEx = /^\/([a-z0-9\-]+)(?:\/|\?|$)/i;
+var jsUrlRegEx = /^\/js\/([a-z0-9]{3,})$/i;
+var jslessUrlRegEx = /^\/([a-z0-9]{3,})$/i;
 var idEncoding = "0123456789abcdefghijklmnopqrstuvwz";
 var idEncodingMax = idEncoding.length;
 
@@ -24,16 +25,24 @@ var server = http.createServer(function (req, res) {
                 while (id.length < 5)
                     id += idEncoding[idraw[id.length] % idEncodingMax];
             }
+
+            res.writeHead(302, { 'Location': '/' + id, 'Cache-Control': 'no-cache' });
+            return res.end();
+        }
+
+        var match = req.url.match(jslessUrlRegEx);
+        if (match) {
+            var id = match[1].toLowerCase();
             res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
             return res.end(index
                 .replace(/\{\{ id \}\}/g, id)
                 .replace(/\{\{ hostport \}\}/g, req.headers['host'] || 'repl.mobi'));
         }
 
-        var match = req.url.match(clientUrlRegEx);
+        match = req.url.match(jsUrlRegEx);
         if (match) {
             var id = match[1].toLowerCase();
-            res.writeHead(200, { 'Content-Type': 'application/javascript' });
+            res.writeHead(200, { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-cache' });
             return res.end(client + "('" + id + "');");
         }
     }
@@ -55,11 +64,11 @@ function kill(socket, status) {
 
 var oldUpgrade = wss.handleUpgrade;
 wss.handleUpgrade = function (request, socket, upgradeHead, callback) {
-    var match = request.url.match(clientUrlRegEx);
+    var match = request.url.match(jslessUrlRegEx);
     if (match) {
         var id = match[1].toLowerCase();
         var protocol = request.headers['sec-websocket-protocol'] || 'client';
-        if (protocol === 'server' || protocol == 'client') {
+        if (protocol === 'server' || protocol === 'client') {
             if (sessions[id] && sessions[id][protocol]) {
                 return kill(socket, 'HTTP/1.1 409 Conflict\r\n\r\n');
             }
