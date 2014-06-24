@@ -8,13 +8,22 @@ var http = require('http')
     , index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
 var clientUrlRegEx = /^\/([a-z0-9\-]+)(?:\/|\?|$)/i;
+var idEncoding = "0123456789abcdefghijklmnopqrstuvwz";
+var idEncodingMax = idEncoding.length;
 
 var sessions = {};
 
 var server = http.createServer(function (req, res) {
     if (req.method == 'GET') {
         if (req.url === '/') {
-            var id = uuid.v4();
+            var id;
+            while (!id || sessions[id]) {
+                var idraw = new Array(16)
+                uuid.v4(null, idraw);
+                id = '';
+                while (id.length < 5)
+                    id += idEncoding[idraw[id.length] % idEncodingMax];
+            }
             res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
             return res.end(index
                 .replace(/\{\{ id \}\}/g, id)
@@ -114,7 +123,7 @@ function onClose(ws) {
         }
         catch (e) {
             try {
-                ws._session[ws._peerProtocol].close()
+                ws._session[ws._peerProtocol].close();
             }
             catch (e1) {}
             delete ws._session[ws._peerProtocol];
