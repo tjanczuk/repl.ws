@@ -31,6 +31,12 @@
         el.onload = onLoaded;
         head.appendChild(el);
 
+        setTimeout(function () {
+            if (!el._loaded) {
+                socket.send('ERROR: resource at ' + url + ' did not load within 3s. Check the URL.');
+            }
+        }, 3000);
+
         return undefined;
 
         function onLoaded() {
@@ -115,9 +121,19 @@
 
     socket.onerror = function (e) {
         alert('replmobi error: ' + e);
+        socket = null;
     };
 
     socket.onclose = function () {
-        alert('replmobi connection closed')
+        alert('replmobi connection closed');
+        socket = null;
+    };
+
+    window.onerror = function (errorMsg, url, lineNumber) {
+        try {
+            socket && socket.send('ERROR: ' + errorMsg + ' at ' + url + ' line ' + lineNumber);
+        }
+        catch (e) {}
+        return false;
     };
 })
