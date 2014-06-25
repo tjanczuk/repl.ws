@@ -68,83 +68,112 @@ wss.handleUpgrade = function (request, socket, upgradeHead, callback) {
     if (match) {
         var id = match[1].toLowerCase();
         var protocol = request.headers['sec-websocket-protocol'] || 'client';
-        if (protocol === 'server' || protocol === 'client') {
-            if (sessions[id] && sessions[id][protocol]) {
-                return kill(socket, 'HTTP/1.1 409 Conflict\r\n\r\n');
-            }
+        if (protocol !== 'server' && protocol !== 'client') 
+            return kill(socket, 'HTTP/1.1 400 Bad Request\r\n\r\n');
 
-            return oldUpgrade.call(wss, request, socket, upgradeHead, function (ws) {
-                ws._id = id;
-                ws._protocol = protocol;
-                ws._peerProtocol = protocol === 'server' ? 'client' : 'server';
-                callback(ws);
-            });
-        }
+        if (protocol === 'client' && sessions[id] && sessions[id][protocol].length > 0) 
+            return kill(socket, 'HTTP/1.1 409 Conflict\r\n\r\n');
 
-        return kill(socket, 'HTTP/1.1 400 Bad Request\r\n\r\n');
+        return oldUpgrade.call(wss, request, socket, upgradeHead, function (ws) {
+            ws._id = id;
+            ws._protocol = protocol;
+            ws._peerProtocol = protocol === 'server' ? 'client' : 'server';
+            callback(ws);
+        });
     }
 
     return kill(socket, 'HTTP/1.1 404 Not Found\r\n\r\n');
 };
 
-function relay(session, src, dest, msg) {
-    console.log('RELAY', src, dest, msg);
-    try {
-        if (session[dest]) {
-            session[dest].send(msg);
-        }
-    }
-    catch (e) {
+function sendMessage(ws, session, src, dest, msg, feedback) {
+    var needClean;
+    session[dest].forEach(function (dest_ws, index) {
         try {
-            session[dest].close();
+            dest_ws.send(src === 'server' && session[src].length > 1 ? ws._wsid + ': ' + msg : msg);
         }
-        catch (e1) {}
-        delete session[dest];
-    
-        try {
-            session[src].send('ERROR: ' + dest + ' is not reachable: ' + e.toString());
-        }
-        catch (e2) {
+        catch (e) {
             try {
-                session[src].close();
+                dest_ws.close();
             }
-            catch (e3) {}
-            delete session[src];
-            delete sessions[session.id];                
+            catch (e1) {}
+
+            var dest_ws_desc = dest;
+            if (session[dest].length > 1)
+                dest_ws_desc += '(' + dest_ws._wsid + ')';
+            session[dest][index] = undefined;
+            needClean = true;
+        
+            if (feedback) {
+                try {
+                    ws.send('ERROR: ' + dest_ws_desc + ' is not reachable: ' + e.toString());
+                }
+                catch (e2) {
+                    try {
+                        ws.close();
+                    }
+                    catch (e3) {}
+                    session[src].forEach(function (src_ws, index) {
+                        if (src_ws === ws) {
+                            session[src][index] = undefined;
+                            needClean = true;
+                        }
+                    });
+                }
+            }
+        }
+
+    });
+
+    if (needClean) 
+        cleanSession(session);    
+}
+
+function cleanSession(session) {
+    clean(session.client);
+    clean(session.server);
+    if (session.client.length === 0 && session.server.length === 0)
+        delete sessions[session.id];
+
+    function clean(wses) {
+        var i = 0; 
+        while (i < wses.length) {
+            if (!wses[i])
+                wses.splice(i, 1);
+            else
+                i++;
         }
     }
 }
 
 function onMessage(ws) {
     return function (msg) {
-        return relay(
+        console.log('RELAY', ws._wsid, ws._protocol, ws._peerProtocol, msg);
+        sendMessage(
+            ws, 
             ws._session, 
             ws._protocol, 
             ws._peerProtocol, 
-            msg); 
+            msg, 
+            true);
     }
 }
 
 function onClose(ws) {
     return function () {
-        try {
-            ws._session[ws._peerProtocol].send('CLOSE: ' + ws._protocol + 'disconnected.');
-        }
-        catch (e) {
-            try {
-                ws._session[ws._peerProtocol].close();
-            }
-            catch (e1) {}
-            delete ws._session[ws._peerProtocol];
-            delete sessions[ws._session.id];
-        }
+        sendMessage(
+            ws, 
+            ws._session, 
+            ws._protocol, 
+            ws._peerProtocol, 
+            'CLOSE: ' + ws._protocol + '(' + ws._wsid + ') disconnected.',
+            false);
     }
 }
 
 wss.on('connection', function(ws) {
     var session = sessions[ws._id];
     if (session) {
-        if (session[ws._protocol]) {
+        if (ws._protocol === 'client' && session[ws._protocol].length > 0) {
             try {
                 ws.send('ERROR: 409 Conflict');
                 ws.close();
@@ -154,11 +183,12 @@ wss.on('connection', function(ws) {
         }
     }
     else {
-        session = { id: ws._id };
+        session = { wsid: 1, id: ws._id, client: [], server: [] };
         sessions[ws._id] = session;
     }
 
-    session[ws._protocol] = ws;
+    ws._wsid = session.wsid++;
+    session[ws._protocol].push(ws);
     ws._session = session;
     ws.on('message', onMessage(ws));
     ws.on('close', onClose(ws));
