@@ -5,7 +5,8 @@ var http = require('http')
     , path = require('path')
     , uuid = require('uuid')
     , client = fs.readFileSync(path.join(__dirname, 'client.js'), 'utf8')
-    , index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+    , index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8')
+    , help = fs.readFileSync(path.join(__dirname, 'help.txt'), 'utf8');
 
 var jsUrlRegEx = /^\/js\/([a-z0-9]{3,})$/i;
 var jslessUrlRegEx = /^\/([a-z0-9]{3,})$/i;
@@ -147,14 +148,22 @@ function cleanSession(session) {
 
 function onMessage(ws) {
     return function (msg) {
-        console.log('RELAY', ws._wsid, ws._protocol, ws._peerProtocol, msg);
-        sendMessage(
-            ws, 
-            ws._session, 
-            ws._protocol, 
-            ws._peerProtocol, 
-            msg, 
-            true);
+        if (msg === '.help' || msg === '.h') {
+            try {
+                ws.send(help);
+            }
+            catch (e) {}
+        }
+        else {
+            console.log('RELAY', ws._wsid, ws._protocol, ws._peerProtocol, msg);
+            sendMessage(
+                ws, 
+                ws._session, 
+                ws._protocol, 
+                ws._peerProtocol, 
+                msg, 
+                true);
+        }
     }
 }
 
@@ -205,5 +214,8 @@ wss.on('connection', function(ws) {
     ws.on('message', onMessage(ws));
     ws.on('close', onClose(ws));
     ws.on('error', onClose(ws));
-
+    try {
+        ws.send('Connected browsers: ' + session[ws._peerProtocol].length + '. Type `.h` for help.');
+    }
+    catch (e1) {}
 }).on('error', console.log);

@@ -1,0 +1,22 @@
+Available commands:
+.ls          - list connected browsers
+.ld(url)     - load JavaScript at `url` into connected browsers
+               e.g. .ld('http://foo.com/bar.js')
+.ldjq        - load default jQuery
+.ldjqm       - load default jQuery Mobile
+.ldjqui      - load default jQuery UI
+.lddojo      - load default Dojo
+.ldext       - load default Ext Core
+.ldang       - load default Angular
+.ldmoo       - load default MooTools
+.ldpro       - load default version of Prototype
+.ldacu       - load default version of script.aculo.us
+.ldjq(ver)   - load specific version of jQuery, e.g. .ldjq('1.4.3')
+.ldjqm(ver)  - load specific version of jQuery Mobile, e.g. .ldjqm('1.4.0')
+.ldjqui(ver) - load specific version of jQuery UI, e.g. .ldjqui('1.9.0')
+.lddojo(ver) - load specific version of Dojo, e.g. .lddojo('1.7.3')
+.ldext(ver)  - load specific version of Ext Core, e.g. .ldext('3.0.0')
+.ldang(ver)  - load specific version of Angular, e.g. .ldext('1.2.13')
+.ldmoo(ver)  - load specific version of MooTools, e.g. .ldext('1.4.0')
+.ldpro(ver)  - load specific version of Prototype, e.g. .ldext('1.6.1.0')
+.ldacu(ver)  - load specific version of script.aculos.us, e.g. .ldext('1.8.1')
