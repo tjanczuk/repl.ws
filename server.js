@@ -160,13 +160,25 @@ function onMessage(ws) {
 
 function onClose(ws) {
     return function () {
-        sendMessage(
-            ws, 
-            ws._session, 
-            ws._protocol, 
-            ws._peerProtocol, 
-            'CLOSE: ' + ws._protocol + '(' + ws._wsid + ') disconnected.',
-            false);
+        if (ws._protocol === 'server') {
+            sendMessage(
+                ws, 
+                ws._session, 
+                ws._protocol, 
+                ws._peerProtocol, 
+                'CLOSE: ' + ws._protocol + '(' + ws._wsid + ') disconnected.',
+                false);
+        }
+
+        var needClean;
+        ws._session[ws._protocol].forEach(function (w, index) {
+            if (w === ws) {
+                ws._session[ws._protocol][index] = undefined;
+                needClean = true;
+            }
+        });
+
+        cleanSession(ws._session);
     }
 }
 
