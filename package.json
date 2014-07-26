@@ -1,5 +1,5 @@
 {
-  "name": "replmobi",
+  "name": "repl.ws",
   "author": {
     "name": "Tomasz Janczuk <tomasz@janczuk.org>",
     "url": "http://tomasz.janczuk.org",
@@ -22,6 +22,6 @@
     "uuid": "1.4.1"
   },
   "bin": {
-    "replmobi": "./server.js"
+    "repl.ws": "./server.js"
   }
 }

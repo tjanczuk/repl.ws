@@ -37,7 +37,7 @@ var server = http.createServer(function (req, res) {
             res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
             return res.end(index
                 .replace(/\{\{ id \}\}/g, id)
-                .replace(/\{\{ hostport \}\}/g, req.headers['host'] || 'repl.mobi'));
+                .replace(/\{\{ hostport \}\}/g, req.headers['host'] || 'repl.ws'));
         }
 
         match = req.url.match(jsUrlRegEx);
