@@ -12,6 +12,7 @@ var jsUrlRegEx = /^\/js\/([a-z0-9]{3,})$/i;
 var jslessUrlRegEx = /^\/([a-z0-9]{3,})\/?(\?json){0,1}$/i;
 var idEncoding = "0123456789abcdefghijklmnopqrstuvwz";
 var idEncodingMax = idEncoding.length;
+var pingIntervalS = 1000 * (process.env.REPLWS_PING_INTERVAL !== undefined ? +process.env.REPLWS_PING_INTERVAL : 15);
 
 var sessions = {};
 
@@ -94,10 +95,10 @@ wss.handleUpgrade = function (request, socket, upgradeHead, callback) {
             return kill(socket, 'HTTP/1.1 409 Conflict\r\n\r\n');
 
         return oldUpgrade.call(wss, request, socket, upgradeHead, function (ws) {
-            var json = !!match[2];
+            ws._json = !!match[2];
             ws._sendFormatted = function (msg) {
-                // console.log('SEND', msg);
-                if (protocol === 'client' && !json && textFormatters[msg.type]) 
+                console.log('SEND', ws._id + ':' + ws._wsid, msg);
+                if (protocol === 'client' && !ws._json && textFormatters[msg.type]) 
                     return ws.send(textFormatters[msg.type](ws, msg));
                     
                 return ws.send(JSON.stringify(msg));
@@ -228,6 +229,11 @@ function onMessage(ws) {
 
 function onClose(ws) {
     return function () {
+        if (ws._ping) {
+            clearInterval(ws._ping);
+            ws._ping = undefined;
+        }
+
         if (ws._protocol === 'server') {
             sendMessage(
                 ws, 
@@ -267,6 +273,15 @@ wss.on('connection', function(ws) {
         sessions[ws._id] = session;
     }
 
+    if (pingIntervalS > 0 && (ws._protocol === 'server' || ws._json)) 
+        ws._ping = setInterval(function () {
+            try {
+                ws._sendFormatted({ type: 'ping' });
+            }
+            catch (e) {
+                // cleanup in onClose
+            }
+        }, pingIntervalS);
     ws._wsid = session.wsid++;
     session[ws._protocol].push(ws);
     ws._session = session;

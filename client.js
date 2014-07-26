@@ -114,7 +114,10 @@
     socket.onmessage = function (msg) {
         try {
             var data = typeof msg.data === 'string' ? msg.data.trim() : '{"msg":""}';
-            data = JSON.parse(data).msg.trim();
+            var json = JSON.parse(data);
+            if (json.type === 'ping')
+                return;
+            data = json.msg.trim();
             var k;
             if (data[0] === '.') {
                 if (data[data.length - 1] !== ')' && data[data.length - 1] !== ';')
