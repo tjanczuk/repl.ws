@@ -1,4 +1,5 @@
 Available commands:
+.s           - show session status
 .ls          - list connected browsers
 .ld(url)     - load JavaScript at `url` into connected browsers
                e.g. .ld('http://foo.com/bar.js')
