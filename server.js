@@ -9,7 +9,7 @@ var http = require('http')
     , help = fs.readFileSync(path.join(__dirname, 'help.txt'), 'utf8');
 
 var jsUrlRegEx = /^\/js\/([a-z0-9]{3,})$/i;
-var jslessUrlRegEx = /^\/([a-z0-9]{3,})$/i;
+var jslessUrlRegEx = /^\/([a-z0-9]{3,})\/?(\?json){0,1}$/i;
 var idEncoding = "0123456789abcdefghijklmnopqrstuvwz";
 var idEncodingMax = idEncoding.length;
 
@@ -64,6 +64,23 @@ function kill(socket, status) {
     catch (e) {}
 }
 
+var textFormatters = {
+    error: function (ws, msg) {
+        return textFormatters.msg(ws, { msg: 'ERROR: ' + msg.msg, from: msg.from });
+    },
+    disconnected: function (ws, msg) {
+        return 'DISCONNECTED: ' + ws._wsid;
+    },
+    msg: function (ws, msg) {
+        return (ws._protocol === 'client' && ws._session.server.length > 1) 
+            ? msg.from + ': ' + msg.msg 
+            : msg.msg;
+    },
+    status: function (ws, msg) {
+        return 'Connected browsers: ' + msg.browsers + '. Type .h for help.';
+    }
+};
+
 var oldUpgrade = wss.handleUpgrade;
 wss.handleUpgrade = function (request, socket, upgradeHead, callback) {
     var match = request.url.match(jslessUrlRegEx);
@@ -77,6 +94,14 @@ wss.handleUpgrade = function (request, socket, upgradeHead, callback) {
             return kill(socket, 'HTTP/1.1 409 Conflict\r\n\r\n');
 
         return oldUpgrade.call(wss, request, socket, upgradeHead, function (ws) {
+            var json = !!match[2];
+            ws._sendFormatted = function (msg) {
+                // console.log('SEND', msg);
+                if (protocol === 'client' && !json && textFormatters[msg.type]) 
+                    return ws.send(textFormatters[msg.type](ws, msg));
+                    
+                return ws.send(JSON.stringify(msg));
+            };
             ws._id = id;
             ws._protocol = protocol;
             ws._peerProtocol = protocol === 'server' ? 'client' : 'server';
@@ -91,7 +116,7 @@ function sendMessage(ws, session, src, dest, msg, feedback) {
     var needClean;
     session[dest].forEach(function (dest_ws, index) {
         try {
-            dest_ws.send(src === 'server' && session[src].length > 1 ? ws._wsid + ': ' + msg : msg);
+            dest_ws._sendFormatted(msg);
         }
         catch (e) {
             try {
@@ -99,15 +124,18 @@ function sendMessage(ws, session, src, dest, msg, feedback) {
             }
             catch (e1) {}
 
-            var dest_ws_desc = dest;
-            if (session[dest].length > 1)
-                dest_ws_desc += '(' + dest_ws._wsid + ')';
             session[dest][index] = undefined;
             needClean = true;
         
             if (feedback) {
                 try {
-                    ws.send('ERROR: ' + dest_ws_desc + ' is not reachable: ' + e.toString());
+                    ws._sendFormatted({
+                        type: 'error',
+                        code: 404,
+                        connection: dest_ws._wsid,
+                        msg: 'Connection ' + dest_ws._wsid + ' not reachable',
+                        details: e.message || e.toString()
+                    });
                 }
                 catch (e2) {
                     try {
@@ -147,16 +175,46 @@ function cleanSession(session) {
     }
 }
 
+var builtIns = {
+    '.help': function (ws) {
+        try {
+            ws._sendFormatted({ 
+                type: 'msg', 
+                msg: help 
+            });
+        }
+        catch (e) {}
+    },
+    '.status': function (ws) {
+        try {
+            ws._sendFormatted({
+                type: 'status',
+                browsers: ws._session.server.length
+            });
+        }
+        catch (e) {}
+    }
+};
+builtIns['.h'] = builtIns['.help'];
+builtIns['.s'] = builtIns['.status'];
+
 function onMessage(ws) {
     return function (msg) {
-        if (msg === '.help' || msg === '.h') {
-            try {
-                ws.send(help);
-            }
-            catch (e) {}
-        }
+        if (typeof msg === 'string' && builtIns[msg]) 
+            builtIns[msg](ws);
         else {
-            console.log('RELAY', ws._wsid, ws._protocol, ws._peerProtocol, msg);
+            if (ws._protocol === 'client')
+                msg = { type: 'msg', msg: msg };
+            else {
+                try {
+                    msg = JSON.parse(msg);
+                }
+                catch (e) {
+                    msg = { type: 'error', code: 400, msg: e.message || e.toString() };
+                }
+                msg.from = ws._wsid;
+            }
+
             sendMessage(
                 ws, 
                 ws._session, 
@@ -176,7 +234,7 @@ function onClose(ws) {
                 ws._session, 
                 ws._protocol, 
                 ws._peerProtocol, 
-                'CLOSE: ' + ws._protocol + '(' + ws._wsid + ') disconnected.',
+                { type: 'disconnected' },
                 false);
         }
 
@@ -197,7 +255,7 @@ wss.on('connection', function(ws) {
     if (session) {
         if (ws._protocol === 'client' && session[ws._protocol].length > 0) {
             try {
-                ws.send('ERROR: 409 Conflict');
+                ws._sendFormatted({ type: 'error', code: 409, msg: 'Cannot connect more than one controller to the session' });
                 ws.close();
             }
             catch (e) {}
@@ -205,7 +263,7 @@ wss.on('connection', function(ws) {
         }
     }
     else {
-        session = { wsid: 1, id: ws._id, client: [], server: [] };
+        session = { wsid: 0, id: ws._id, client: [], server: [] };
         sessions[ws._id] = session;
     }
 
@@ -215,8 +273,7 @@ wss.on('connection', function(ws) {
     ws.on('message', onMessage(ws));
     ws.on('close', onClose(ws));
     ws.on('error', onClose(ws));
-    try {
-        ws.send('Connected browsers: ' + session[ws._peerProtocol].length + '. Type `.h` for help.');
+    if (ws._protocol === 'client') {
+        builtIns['.status'](ws);
     }
-    catch (e1) {}
 }).on('error', console.log);

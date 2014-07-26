@@ -1,2 +1,2 @@
-replmobi - JavaScript REPL relay
+repl.ws - JavaScript REPL relay
 =====

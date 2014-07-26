@@ -3,6 +3,10 @@
     var address = 'ws://' + window.location.host + '/' + id;
     var socket = new WebSocket(address, 'server');
 
+    function send(socket, msg) {
+        socket.send(JSON.stringify(msg));
+    }
+
     var BuiltIns = function () {}
 
     BuiltIns.prototype.ls = function (cb) {
@@ -33,7 +37,12 @@
 
         setTimeout(function () {
             if (!el._loaded) {
-                socket.send('ERROR: resource at ' + url + ' did not load within 3s. Check the URL.');
+                send(socket, {
+                    type: 'error',
+                    code: 404,
+                    url: url,
+                    msg: 'Resource at ' + url + ' did not load within 3s. Check the URL.'
+                });
             }
         }, 3000);
 
@@ -42,7 +51,11 @@
         function onLoaded() {
             if (!el._loaded) {
                 el._loaded = true;
-                socket.send('Loaded ' + url);
+                send(socket, {
+                    type: 'msg',
+                    url: url,
+                    msg: 'Loaded ' + url
+                });
             }
         }
     };
@@ -100,7 +113,8 @@
 
     socket.onmessage = function (msg) {
         try {
-            var data = typeof msg.data === 'string' ? msg.data.trim() : '';
+            var data = typeof msg.data === 'string' ? msg.data.trim() : '{"msg":""}';
+            data = JSON.parse(data).msg.trim();
             var k;
             if (data[0] === '.') {
                 if (data[data.length - 1] !== ')' && data[data.length - 1] !== ';')
@@ -112,26 +126,39 @@
             }
 
             if (data[0] !== '.' || k !== undefined)
-                socket.send(k + '');
+                send(socket, { 
+                    type: 'msg',
+                    msg: k + ''
+                });
         }
         catch (e) {
-            socket.send('ERROR:\n' + e);
+            send(socket, {
+                type: 'error',
+                code: 500,
+                msg: e.message || e.toString()
+            });
         }
     };
 
     socket.onerror = function (e) {
-        alert('replmobi error: ' + e);
+        alert('repl.ws error: ' + e.message || e.toString());
         socket = null;
     };
 
     socket.onclose = function () {
-        alert('replmobi connection closed');
+        alert('repl.ws connection closed');
         socket = null;
     };
 
     window.onerror = function (errorMsg, url, lineNumber) {
         try {
-            socket && socket.send('ERROR: ' + errorMsg + ' at ' + url + ' line ' + lineNumber);
+            socket && send(socket, {
+                type: 'error',
+                code: 500,
+                url: url,
+                line: lineNumber,
+                msg: errorMsg + ' at ' + url + ' line ' + lineNumber
+            });
         }
         catch (e) {}
         return false;
