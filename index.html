@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+ 
+  <head>
+    <meta charset="utf-8">
+
+    <title>repl.ws</title>
+
+    <meta name="description" content="Remote REPL for JavaScript">
+    <meta name="author" content="Tomasz Janczuk">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=479349292107454";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>    
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section>
+          <h1>repl.ws</h1>
+          <h3>Remote scripting of browsers</h3>
+          <h5>Good for <span style="color: red">ad-hoc debugging</span> and <span style="color: red">automated testing</span></h5>
+          <h5>Of <span style="color: red">mobile web applications</span> and other browsers</h5>
+          <p>
+            <small>Brought to you by <a href="http://tomasz.janczuk.org">Tomasz Janczuk</a> / <a href="http://twitter.com/tjanczuk">@tjanczuk</a><br>(Use space or arrow keys to navigate)</small>
+          </p>  
+        </section>
+
+        <section>
+          <h2>with <span style="color: red">repl.ws</span> you can</h2>
+          <h3>Run JavaScript remotely on multiple browsers...</h3>
+          <img src="https://cloud.githubusercontent.com/assets/822369/3712549/041282f8-151e-11e4-8fd6-6f2740e3f347.png" width="746" height="418">
+          <h3>...from a console or programmatically</h3>
+        </section>
+<!--
+        <section>
+          <h2>.NET welcomes Node.js</h2>
+          <p><small>Call C# async lambda from Node.js</small></p>
+          <pre><code>
+var edge = require('edge');
+
+var hello = edge.func(function () {/*
+    async (input) => { 
+        return ".NET welcomes " + input.ToString(); 
+    }
+*/});
+
+hello('Node.js', function (error, result) {
+    if (error) throw error;
+    console.log(result);
+});
+          </code></pre>     
+          <a href="https://github.com/tjanczuk/edge/blob/master/samples/101_hello_lambda.js"><small>see full code</small></a>
+          <pre><code>
+> node sample.js
+.NET welcomes Node.js
+          </code></pre>                  
+        </section>
+-->
+
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+          { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+          // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+          // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+      });
+
+    </script>
+
+<a href="https://github.com/tjanczuk/repl.ws"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>    
+
+<iframe allowtransparency="true" frameborder="0" scrolling="no"
+        src="https://platform.twitter.com/widgets/tweet_button.html?url=http://tjanczuk.github.io/repl.ws&via=tjanczuk&text=Remote REPL for JavaScript: debug and test your browser apps remotely&count=horizontal&hashtags=javascript,replws,nodejs,browser,web"
+        style="width:130px; height:20px; position: absolute; top: 20px; left: 20px; border: 0;"></iframe>
+
+<!-- Place this tag where you want the +1 button to render. -->
+<div style="width:130px; height:20px; position: absolute; top: 50px; left: 20px; border: 0;">
+  <div class="g-plusone" data-size="medium" data-annotation="inline" data-width="130" data-href="http://tjanczuk.github.io/repl.ws"></div>
+</div>
+
+<div style="width:130px; height:20px; position: absolute; top: 80px; left: 20px; border: 0;">
+  <div class="fb-share-button" data-href="http://tjanczuk.github.io/repl.ws" data-width="130" data-type="button_count"></div>
+</div>
+
+<div style="width:130px; height:20px; position: absolute; top: 130px; left: 20px; border: 0;">
+  <a href="https://twitter.com/tjanczuk" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @tjanczuk</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>  
+</div>
+
+<script type="text/javascript">
+  (function() {
+    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+    po.src = 'https://apis.google.com/js/platform.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+  })();
+</script>     
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29444039-3', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
