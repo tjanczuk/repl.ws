@@ -1,6 +1,6 @@
-(function (id) {
+(function () {
 
-    var address = 'ws://' + window.location.host + '/' + id;
+    var address = 'ws://{{ hostport }}/{{ id }}';
     var socket = new WebSocket(address, 'server');
 
     function send(socket, msg) {
@@ -166,4 +166,4 @@
         catch (e) {}
         return false;
     };
-})
+})();

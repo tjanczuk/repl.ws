@@ -45,7 +45,9 @@ var server = http.createServer(function (req, res) {
         if (match) {
             var id = match[1].toLowerCase();
             res.writeHead(200, { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-cache' });
-            res.write(client);
+            return res.end(client
+                .replace(/\{\{ id \}\}/g, id)
+                .replace(/\{\{ hostport \}\}/g, req.headers['host'] || 'repl.ws'));
             return res.end("('" + id + "');");
         }
     }
