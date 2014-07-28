@@ -48,9 +48,10 @@
 
         <section>
           <h1>repl.ws</h1>
-          <h3>Remote scripting of browsers</h3>
+          <h3>Script browsers remotely</h3>
           <h5>Good for <span style="color: red">ad-hoc debugging</span> and <span style="color: red">automated testing</span></h5>
-          <h5>Of <span style="color: red">mobile web applications</span> and other browsers</h5>
+          <h5>Of <span style="color: red">web applications</span></h5>
+          <h5>Also shown to remedy other ailments</span></h5>
           <p>
             <small>Brought to you by <a href="http://tomasz.janczuk.org">Tomasz Janczuk</a> / <a href="http://twitter.com/tjanczuk">@tjanczuk</a><br>(Use space or arrow keys to navigate)</small>
           </p>  
@@ -59,34 +60,125 @@
         <section>
           <h2>with <span style="color: red">repl.ws</span> you can</h2>
           <h3>Run JavaScript remotely on multiple browsers...</h3>
-          <img src="https://cloud.githubusercontent.com/assets/822369/3712549/041282f8-151e-11e4-8fd6-6f2740e3f347.png" width="746" height="418">
+          <img style="border: 0" src="https://cloud.githubusercontent.com/assets/822369/3712549/041282f8-151e-11e4-8fd6-6f2740e3f347.png" width="746" height="418">
           <h3>...from a console or programmatically</h3>
         </section>
-<!--
+
         <section>
-          <h2>.NET welcomes Node.js</h2>
-          <p><small>Call C# async lambda from Node.js</small></p>
-          <pre><code>
-var edge = require('edge');
+          <h2><span style="color: red">repl.ws</span> is</h2>
+          <h3>a websocket relay in the cloud</h3>
+          <h5>supports <span style="color: red">multiple sessions</span></h5>
+          <h5><span style="color: red">each session</span> connects <span style="color: red">many browsers</span> with <span style="color: red">one controller</span></h5>
+          <h5><span style="color: red">controller sends javascript</span> to browsers</h5>
+          <h5><span style="color: red">browsers execute it</span> and send back results to controller</h5>
+          <h3>repl.ws is a chatroom where people speak</h3>
+          <h3>javascript and json</h3>
+        </section>        
 
-var hello = edge.func(function () {/*
-    async (input) => { 
-        return ".NET welcomes " + input.ToString(); 
-    }
-*/});
+        <section>
+          <h2>You can use <span style="color: red">repl.ws</span></h2>
+          <h3>as a <span style="color: red">free cloud service</span> at http://repl.ws</h3>
+          <h5>Provided to you pro publico bono by<br><a href="https://twitter.com/tjanczuk">yours truly</a></h5>
+          <h3>or <span style="color: red">host it yourself</span></h3>
+          <h5>by way of<br><a href="https://github.com/tjanczuk/repl.ws">open source</a></h5>
+        </section>   
 
-hello('Node.js', function (error, result) {
-    if (error) throw error;
-    console.log(result);
-});
-          </code></pre>     
-          <a href="https://github.com/tjanczuk/edge/blob/master/samples/101_hello_lambda.js"><small>see full code</small></a>
-          <pre><code>
-> node sample.js
-.NET welcomes Node.js
-          </code></pre>                  
+        <section>
+          <h2>Let's <span style="color: red">get started</span></h2>
+          <h3>Add a script to your web site</h3>
+          <pre><code language="html" id="id1">
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;script src="http://repl.ws/js/{{id}}"&gt;&lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;Lorem ipsum&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;      
+          </code></pre>
+          <p><small id="id2">Note the <span style="color: red">{{id}}</span> in the script URL
+          <br>It is your <span style="color: red">repl.ws session identifier</span>
+          <br>It does not need to be pre-registered, but it should be <span style="color: red">unique</span>
+          <br>So use enough entropy - think of it as a password</small></p>
+          <h3>Now open your web site in a browser</h3>
         </section>
--->
+
+        <section>
+          <h2>Connect a <span style="color: red">controller</span></h2>
+          <p><small>Let's start with a generic, console-based Node.js WebSocket client</small></p>
+          <h5><a href="http://nodejs.org">1. Install Node.js (one-time)</a></h5>
+          <h5>2. Install ws Node.js module (one-time)</h5>
+          <pre><code>
+npm install ws -g
+          </code></pre>
+          <h5>3. Connect wscat to the repl.ws session</h5>
+          <pre><code id="id3">
+wscat -c ws://repl.ws/{{id}}
+          </code></pre>
+          <h3>And now...</h3>
+        </section>
+
+        <section>
+          <h2>Hello, world!</h2>
+          <p><small>Manipulate the DOM</small></p>
+          <pre><code>
+&gt; document.body.innerHTML="Hello, world!"
+&lt; Hello, world!
+          </code></pre>
+          <p><small>Observe the changes in the browser window</small></p>
+        </section>
+
+        <section>
+          <h2>Load a script into the page</h2>
+          <p><small>Let's load and use jQuery</small></p>
+          <pre><code>
+&gt; .ld('//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js')
+&lt; Loaded //ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
+&gt; $('body').html()
+&lt; Hello, world!
+          </code></pre>
+          <p><small>Type .h to see other built-in functions besides .ld</small></p>
+        </section>
+
+        <section>
+          <h2>Load CSS into the page</h2>
+          <p><small>Let's load jQuery UI CSS</small></p>
+          <pre><code>
+&gt; .ld('//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css')
+&lt; Loaded //ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>Other built-in helper functions</h2>
+          <p><small>Type .h to get help</small></p>
+          <pre><code>
+&gt; .h
+&lt; Available commands:
+.s           - show session status
+.ls          - list connected browsers
+.ld(url)     - load JavaScript at `url` into connected browsers
+               e.g. .ld('http://foo.com/bar.js')
+.ldjq        - load default jQuery
+.ldjqm       - load default jQuery Mobile
+.ldjqui      - load default jQuery UI
+.lddojo      - load default Dojo
+.ldext       - load default Ext Core
+.ldang       - load default Angular
+.ldmoo       - load default MooTools
+.ldpro       - load default version of Prototype
+.ldacu       - load default version of script.aculo.us
+.ldjq(ver)   - load specific version of jQuery, e.g. .ldjq('1.4.3')
+.ldjqm(ver)  - load specific version of jQuery Mobile, e.g. .ldjqm('1.4.0')
+.ldjqui(ver) - load specific version of jQuery UI, e.g. .ldjqui('1.9.0')
+.lddojo(ver) - load specific version of Dojo, e.g. .lddojo('1.7.3')
+.ldext(ver)  - load specific version of Ext Core, e.g. .ldext('3.0.0')
+.ldang(ver)  - load specific version of Angular, e.g. .ldang('1.2.13')
+.ldmoo(ver)  - load specific version of MooTools, e.g. .ldmoo('1.4.0')
+.ldpro(ver)  - load specific version of Prototype, e.g. .ldpro('1.6.1.0')
+.ldacu(ver)  - load specific version of script.aculos.us, e.g. .ldacu('1.8.1')
+          </code></pre>
+        </section>
 
       </div>
 
@@ -159,6 +251,13 @@ hello('Node.js', function (error, result) {
   ga('create', 'UA-29444039-3', 'auto');
   ga('send', 'pageview');
 
+</script>
+<script>
+  var id = Math.floor(Math.random() * 999999999) + '';
+  for (var k = 1; k <= 4; k++) {
+    var el = document.getElementById('id' + k);
+    el.innerHTML = el.innerHTML.replace('{{id}}', id);
+  }
 </script>
   </body>
 </html>
