@@ -1,8 +1,8 @@
 repl.ws: script browsers remotely
 =====
 
-## [Learn more](http://tjanczuk.github.io/repl.ws) | [Try it out](http://repl.ws)
+### [Learn more](http://tjanczuk.github.io/repl.ws) | [Try it out](http://repl.ws)
 
-## Documentation
+### Documentation
 
 Coming soon...
