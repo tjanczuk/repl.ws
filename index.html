@@ -68,7 +68,7 @@
           <h2><span style="color: red">repl.ws</span> is</h2>
           <h3>a websocket relay in the cloud</h3>
           <h5>supports <span style="color: red">multiple sessions</span></h5>
-          <h5><span style="color: red">each session</span> connects <span style="color: red">many browsers</span> with <span style="color: red">one controller</span></h5>
+          <h5><span style="color: red">a session</span> connects <span style="color: red">many browsers</span> with <span style="color: red">one controller</span></h5>
           <h5><span style="color: red">controller sends javascript</span> to browsers</h5>
           <h5><span style="color: red">browsers execute it</span> and send back results to controller</h5>
           <h3>repl.ws is a chatroom where people speak</h3>
@@ -100,28 +100,28 @@
           <br>It is your <span style="color: red">repl.ws session identifier</span>
           <br>It does not need to be pre-registered, but it should be <span style="color: red">unique</span>
           <br>So use enough entropy - think of it as a password</small></p>
-          <h3>Now open your web site in a browser</h3>
+          <h3>Now open your web site in a browser and...</h3>
         </section>
 
         <section>
-          <h2>Connect a <span style="color: red">controller</span></h2>
-          <p><small>Let's start with a generic, console-based Node.js WebSocket client</small></p>
+          <h2>...Connect a <span style="color: red">controller</span></h2>
+          <p><small>Use a generic, console-based Node.js WebSocket client</small></p>
           <h5><a href="http://nodejs.org">1. Install Node.js (one-time)</a></h5>
           <h5>2. Install ws Node.js module (one-time)</h5>
           <pre><code>
 npm install ws -g
           </code></pre>
           <h5>3. Connect wscat to the repl.ws session</h5>
-          <pre><code id="id3">
+          <pre><code id="id3" class="no-highlight">
 wscat -c ws://repl.ws/{{id}}
           </code></pre>
-          <h3>And now...</h3>
+          <h3>Finally...</h3>
         </section>
 
         <section>
           <h2>Hello, world!</h2>
-          <p><small>Manipulate the DOM</small></p>
-          <pre><code>
+          <p><small>Remotely manipulate the DOM</small></p>
+          <pre><code class="no-highlight">
 &gt; document.body.innerHTML="Hello, world!"
 &lt; Hello, world!
           </code></pre>
@@ -129,30 +129,64 @@ wscat -c ws://repl.ws/{{id}}
         </section>
 
         <section>
-          <h2>Load a script into the page</h2>
+          <h2>Remotely load a script into the page</h2>
           <p><small>Let's load and use jQuery</small></p>
-          <pre><code>
+          <pre><code class="no-highlight">
 &gt; .ld('//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js')
 &lt; Loaded //ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
+
 &gt; $('body').html()
 &lt; Hello, world!
+          </code></pre>
+          <p><small>...or use a shorthand for loading JQuery:</small></p>
+          <pre><code class="no-highlight">
+&gt; .ldjq
+&lt; Loaded //ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js
           </code></pre>
           <p><small>Type .h to see other built-in functions besides .ld</small></p>
         </section>
 
         <section>
-          <h2>Load CSS into the page</h2>
+          <h2>Remotely load CSS into the page</h2>
           <p><small>Let's load jQuery UI CSS</small></p>
-          <pre><code>
+          <pre><code class="no-highlight">
 &gt; .ld('//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css')
 &lt; Loaded //ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css
           </code></pre>
         </section>
 
         <section>
+          <h2>Remotely modify CSS</h2>
+          <p><small>Experiment with or fine tune CSS on actual device/browser</small><p>
+          <pre><code class="no-highlight">
+&gt; $('p').css('color', 'red').css('font-size','2em')
+&lt; [object Object]
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>Remotely launch a YouTube video</h2>
+          <p><small>Start a JSConf.US 2014 video on connected browsers</small><p>
+          <pre><code class="no-highlight">
+&gt; $('body').html('&lt;iframe src="//www.youtube.com/embed/2RevdtDs6tU"&gt;&lt;/iframe&gt;')
+&lt; [object Object]
+          </code></pre>
+        </section>
+
+        <section>
+          <h2>List connected browsers</h2>
+          <p><small>Each browser connected to the session has an identifier</small></p>
+          <pre><code class="no-highlight">
+&gt; .ls
+&lt; 0: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36
+&lt; 2: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.76.4 (KHTML, like Gecko) Version/7.0.4 Safari/537.76.4
+          </code></pre>
+        </section>
+
+        <section>
           <h2>Other built-in helper functions</h2>
           <p><small>Type .h to get help</small></p>
-          <pre><code>
+          <pre><code class="no-highlight">
 &gt; .h
 &lt; Available commands:
 .s           - show session status
@@ -164,21 +198,38 @@ wscat -c ws://repl.ws/{{id}}
 .ldjqui      - load default jQuery UI
 .lddojo      - load default Dojo
 .ldext       - load default Ext Core
-.ldang       - load default Angular
-.ldmoo       - load default MooTools
-.ldpro       - load default version of Prototype
-.ldacu       - load default version of script.aculo.us
 .ldjq(ver)   - load specific version of jQuery, e.g. .ldjq('1.4.3')
 .ldjqm(ver)  - load specific version of jQuery Mobile, e.g. .ldjqm('1.4.0')
-.ldjqui(ver) - load specific version of jQuery UI, e.g. .ldjqui('1.9.0')
-.lddojo(ver) - load specific version of Dojo, e.g. .lddojo('1.7.3')
-.ldext(ver)  - load specific version of Ext Core, e.g. .ldext('3.0.0')
-.ldang(ver)  - load specific version of Angular, e.g. .ldang('1.2.13')
-.ldmoo(ver)  - load specific version of MooTools, e.g. .ldmoo('1.4.0')
-.ldpro(ver)  - load specific version of Prototype, e.g. .ldpro('1.6.1.0')
-.ldacu(ver)  - load specific version of script.aculos.us, e.g. .ldacu('1.8.1')
+
+... and more
           </code></pre>
         </section>
+
+        <section>
+          <h2>JSON support</h2>
+          <p><small>Receive JSON from browsers for programmatic control with <span style="color: red">?json</span> query parameter:</small></p>
+          <pre><code class="no-highlight" id="id4">
+wscat -c ws://repl.ws/{{id}}?json
+          </code></pre>
+          <p><small>Repl.ws responses will now be JSON encoded:</small></p>
+          <pre><code class="no-highlight">
+&lt; .s
+&lt; {"type":"status","browsers":1}
+
+&gt; $('body p').length
+&lt; {"type":"msg","msg":"2","from":0}
+          </code></pre>
+          <p><small>JSON protocol details on <a href="https://github.com/tjanczuk/repl.ws">GitHub</a></small></p>
+        </section>
+
+        <section>
+          <h3>Try it now</h3>
+          <h2 style="font-size: 3em"><span style="color: red">http://repl.ws</span></h2>
+          <p>
+            <small>Brought to you by <a href="http://tomasz.janczuk.org">Tomasz Janczuk</a> / <a href="http://twitter.com/tjanczuk">@tjanczuk</a></small>
+          </p>  
+        </section>
+
 
       </div>
 
@@ -218,7 +269,7 @@ wscat -c ws://repl.ws/{{id}}
 <a href="https://github.com/tjanczuk/repl.ws"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>    
 
 <iframe allowtransparency="true" frameborder="0" scrolling="no"
-        src="https://platform.twitter.com/widgets/tweet_button.html?url=http://tjanczuk.github.io/repl.ws&via=tjanczuk&text=Remote REPL for JavaScript: debug and test your browser apps remotely&count=horizontal&hashtags=javascript,replws,nodejs,browser,web"
+        src="https://platform.twitter.com/widgets/tweet_button.html?url=http://tjanczuk.github.io/repl.ws&via=tjanczuk&text=repl.ws: debug and test your web apps remotely&count=horizontal&hashtags=javascript,replws,nodejs,browser,web"
         style="width:130px; height:20px; position: absolute; top: 20px; left: 20px; border: 0;"></iframe>
 
 <!-- Place this tag where you want the +1 button to render. -->
