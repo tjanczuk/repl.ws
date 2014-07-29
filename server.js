@@ -12,7 +12,8 @@ var jsUrlRegEx = /^\/js\/([a-z0-9]{3,})$/i;
 var jslessUrlRegEx = /^\/([a-z0-9]{3,})\/?(\?json){0,1}$/i;
 var idEncoding = "0123456789abcdefghijklmnopqrstuvwz";
 var idEncodingMax = idEncoding.length;
-var pingIntervalS = 1000 * (process.env.REPLWS_PING_INTERVAL !== undefined ? +process.env.REPLWS_PING_INTERVAL : 15);
+var pingInterval = 1000 * (process.env.REPLWS_PING_INTERVAL !== undefined 
+                            ? +process.env.REPLWS_PING_INTERVAL : 45);
 
 var sessions = {};
 
@@ -81,6 +82,9 @@ var textFormatters = {
     },
     status: function (ws, msg) {
         return 'Connected browsers: ' + msg.browsers + '. Type .h for help.';
+    },
+    ping: function (ws, msg) {
+        return 'PING: ' + ws._id + ':' + ws._wsid + ' at ' + new Date();
     }
 };
 
@@ -100,6 +104,7 @@ wss.handleUpgrade = function (request, socket, upgradeHead, callback) {
             ws._json = !!match[2];
             ws._sendFormatted = function (msg) {
                 console.log('SEND', ws._id + ':' + ws._wsid, msg);
+                ws._lastActivity = new Date();
                 if (protocol === 'client' && !ws._json && textFormatters[msg.type]) 
                     return ws.send(textFormatters[msg.type](ws, msg));
                     
@@ -203,6 +208,7 @@ builtIns['.s'] = builtIns['.status'];
 
 function onMessage(ws) {
     return function (msg) {
+        ws._lastActivity = new Date();
         if (typeof msg === 'string' && builtIns[msg]) 
             builtIns[msg](ws);
         else {
@@ -275,15 +281,16 @@ wss.on('connection', function(ws) {
         sessions[ws._id] = session;
     }
 
-    if (pingIntervalS > 0 && (ws._protocol === 'server' || ws._json)) 
+    if (pingInterval > 0) 
         ws._ping = setInterval(function () {
             try {
-                ws._sendFormatted({ type: 'ping' });
+                if ((new Date() - ws._lastActivity) > pingInterval)
+                    ws._sendFormatted({ type: 'ping' });
             }
             catch (e) {
                 // cleanup in onClose
             }
-        }, pingIntervalS);
+        }, pingInterval);
     ws._wsid = session.wsid++;
     session[ws._protocol].push(ws);
     ws._session = session;
