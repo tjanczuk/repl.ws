@@ -1,13 +1,42 @@
+<!DOCTYPE html>
 <html>
-<title>repl.ws</title>
-<head>
-<script src="/js/{{ id }}"></script>
-</head>
-<body>
-    <h1>repl.ws</h1>
-    <p>To script this browser window remotely:</p>
-    <pre>npm install ws -g
-wscat -c ws://{{ hostport }}/{{ id }}
-    </pre></p>
-</body>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="repl.ws: script browsers remotely" />
+    <link rel="stylesheet" type="text/css" media="screen" href="//tjanczuk.github.io/about/stylesheets/stylesheet.css">
+
+    <script src="//{{ hostport }}/js/{{ id }}"></script>
+
+    <title>repl.ws</title>
+  </head>
+
+  <body>
+
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/tjanczuk/repl.ws">View on GitHub</a>
+          <h1 id="project_title">repl.ws</h1>
+          <p id="project_tagline">Script browsers remotely | <a href="http://tjanczuk.github.io/repl.ws">Learn more</a></p>
+        </header>
+    </div>
+
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+
+        <h3>Script this browser window</h3>
+        <p><pre>npm install ws -g
+wscat -c ws://{{ hostport }}/{{ id }}</pre></p>
+
+        <h3>Add another browser window to this session</h3>
+        <a href="http://{{ hostport }}/{{ id }}" target="_blank"><img src="https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=http://{{ hostport }}/{{ id }}"/></a>
+
+        <h3>Brought to you by</h3>
+        <p>Tomasz Janczuk | <a href="http://tomasz.janczuk.org">http://tomasz.janczuk.org</a> | 
+        <a href="https://twitter.com/tjanczuk">@tjanczuk</a></p>
+
+      </section>
+    </div>
+  </body>
 </html>
